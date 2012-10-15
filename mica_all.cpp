@@ -17,6 +17,7 @@
 #include "mica_memfootprint.h" // needed for memOp, memfootprint_instr_interval_output and memfootprint_instr_interval_reset
 #include "mica_memstackdist.h" // needed for memstackdist_memRead, memstackdist_instr_interval_output and memstackdist_instr_interval_reset
 #include "mica_fullmemstackdist.h" // needed for fullmemstackdist_memRead, fullmemstackdist_instr_interval_output and fullmemstackdist_instr_interval_reset
+#include "mica_linecount.h" // needed for linecount_instr_interval_reset, linecount_instr_interval_output
 
 #define PROGRESS_THRESHOLD 10000000 // 10M
 
@@ -46,6 +47,7 @@ void init_all(){
 	init_memfootprint();
 	init_memstackdist();
 	init_fullmemstackdist();
+	init_linecount();
 }
 
 ADDRINT returnArg(BOOL arg){
@@ -227,6 +229,9 @@ VOID all_instr_interval(){
 
 	fullmemstackdist_instr_interval_output();
 	fullmemstackdist_instr_interval_reset();
+
+	linecount_instr_interval_output();
+	linecount_instr_interval_reset();
 
 	interval_ins_count = 0;
 	interval_ins_count_for_hpc_alignment = 0;

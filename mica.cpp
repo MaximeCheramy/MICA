@@ -36,6 +36,7 @@
 #include "mica_memfootprint.h"
 #include "mica_memstackdist.h"
 #include "mica_fullmemstackdist.h"
+#include "mica_linecount.h"
 
 #include <sstream>
 #include <iostream>
@@ -185,6 +186,7 @@ VOID Fini_all(INT32 code, VOID* v){
 	fini_memfootprint(code, v);
 	fini_memstackdist(code, v);
 	fini_fullmemstackdist(code, v);
+	fini_linecount(code, v);
 }
 
 /* ILP */
@@ -407,6 +409,38 @@ VOID Fini_memfootprint_only(INT32 code, VOID* v){
 	fini_memfootprint(code, v);
 }
 
+/* LINECOUNT */
+VOID Instruction_linecount_only(INS ins, VOID* v){
+	if(interval_size == -1){
+		if(INS_HasRealRep(ins)){
+			INS_InsertIfCall(ins, IPOINT_BEFORE, (AFUNPTR)returnArg, IARG_FIRST_REP_ITERATION, IARG_END);
+			INS_InsertThenCall(ins, IPOINT_BEFORE, (AFUNPTR)all_instr_full_count_for_hpc_alignment_with_rep, IARG_REG_VALUE, INS_RepCountRegister(ins), IARG_END);
+		}
+		else{
+			INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)all_instr_full_count_for_hpc_alignment_no_rep, IARG_END);
+		}
+		INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)all_instr_full_count_always, IARG_END);
+	}
+	else{
+		if(INS_HasRealRep(ins)){
+			INS_InsertIfCall(ins, IPOINT_BEFORE, (AFUNPTR)returnArg, IARG_FIRST_REP_ITERATION, IARG_END);
+			INS_InsertThenCall(ins, IPOINT_BEFORE, (AFUNPTR)all_instr_intervals_count_for_hpc_alignment_with_rep, IARG_REG_VALUE, INS_RepCountRegister(ins), IARG_END);
+		}
+		else{
+			INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)all_instr_intervals_count_for_hpc_alignment_no_rep, IARG_END);
+		}
+		INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)all_instr_intervals_count_always, IARG_END);
+	}
+
+	instrument_linecount(ins, v);
+}
+
+VOID Fini_linecount_only(INT32 code, VOID* v){
+	fini_linecount(code, v);
+}
+
+
+
 /* MEMSTACKDIST */
 VOID Instruction_memstackdist_only(INS ins, VOID* v){
 	if(interval_size == -1){
@@ -614,6 +648,12 @@ int main(int argc, char* argv[]){
 			PIN_Init(argc, argv);
 			INS_AddInstrumentFunction(Instruction_memfootprint_only, 0);
 			PIN_AddFiniFunction(Fini_memfootprint_only, 0);
+			break;
+		case MODE_LINECOUNT:
+			init_linecount();
+			PIN_Init(argc, argv);
+			INS_AddInstrumentFunction(Instruction_linecount_only, 0);
+			PIN_AddFiniFunction(Fini_linecount_only, 0);
 			break;
 		case MODE_MEMSTACKDIST:
 			init_memstackdist();
