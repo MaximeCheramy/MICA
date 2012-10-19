@@ -89,16 +89,30 @@ VOID linecount_mem_op(ADDRINT effMemAddr, ADDRINT size){
 	}
 }
 
+static ADDRINT linecount_instr_intervals() {
+	return (ADDRINT)(interval_ins_count_for_hpc_alignment == interval_size);
+}
+
 VOID linecount_instr_interval_output(){
 	linecount_output();
+	output_file_linecount << endl;
 }
 
 VOID linecount_instr_interval_reset(){
 	/* clean used memory, to avoid memory shortage for long (CPU2006) benchmarks */
 	working_set_size = 0;
+	mem_ref = 0;
 	for(ADDRINT i=0; i < MAX_MEM_TABLE_ENTRIES; i++){
 		free_nlist(DmemCacheWorkingSetTable[i]);
 	}
+	accesses_for_line[0] = 0;
+}
+
+static VOID linecount_instr_interval(){
+	linecount_instr_interval_output();
+	linecount_instr_interval_reset();
+	interval_ins_count = 0;
+	interval_ins_count_for_hpc_alignment = 0;
 }
 
 /* instrumenting (instruction level) */
@@ -109,6 +123,11 @@ VOID instrument_linecount(INS ins, VOID* v) {
 		if(INS_HasMemoryRead2(ins)){
 			INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)linecount_mem_op, IARG_MEMORYREAD2_EA, IARG_MEMORYREAD_SIZE, IARG_END);
 		}
+	}
+
+	if (interval_size != -1) {
+		INS_InsertIfCall(ins, IPOINT_BEFORE, (AFUNPTR)linecount_instr_intervals, IARG_END);
+		INS_InsertThenCall(ins, IPOINT_BEFORE, (AFUNPTR)linecount_instr_interval, IARG_END);
 	}
 }
 
