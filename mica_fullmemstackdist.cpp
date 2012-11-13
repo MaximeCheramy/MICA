@@ -52,7 +52,7 @@ static INT64 cold_refs;
 static ofstream output_file;
 
 /* Counters of accesses for each distance. */
-#define DIST_MAX 129
+#define DIST_MAX 2049
 static INT64 distances[DIST_MAX];
 
 /* initializing */
