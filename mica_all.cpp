@@ -115,6 +115,8 @@ ADDRINT all_buffer_instruction_2reads_write(void* _e, ADDRINT read1_addr, ADDRIN
 	memOp(read1_addr, read_size); // memfootprint
 	memOp(read2_addr, read_size);
 	memOp(write_addr, write_size);
+	linecount_mem_op(read1_addr, read_size); // linecount
+	linecount_mem_op(read2_addr, read_size);
 	memstackdist_memRead(read1_addr, read_size); // memstackdist
 	memstackdist_memRead(read2_addr, read_size);
 	fullmemstackdist_memRead(read1_addr, read_size); // fullmemstackdist
@@ -136,6 +138,7 @@ ADDRINT all_buffer_instruction_read_write(void* _e, ADDRINT read1_addr, ADDRINT 
 	writeMem_stride(stride_index_memwrite, write_addr, write_size);
 	memOp(read1_addr, read_size); // memfootprint
 	memOp(write_addr, write_size);
+	linecount_mem_op(read1_addr, read_size); // linecount
 	memstackdist_memRead(read1_addr, read_size); // memstackdist
 	fullmemstackdist_memRead(read1_addr, read_size); // fullmemstackdist
 	//return ilp_buffer_instruction_read_write(_e, read1_addr, read_size, write_addr, write_size);
@@ -152,6 +155,8 @@ ADDRINT all_buffer_instruction_2reads(void* _e, ADDRINT read1_addr, ADDRINT read
 	readMem_stride(stride_index_memread2, read2_addr, read_size);
 	memOp(read1_addr, read_size); // memfootprint
 	memOp(read2_addr, read_size);
+	linecount_mem_op(read1_addr, read_size); // linecount
+	linecount_mem_op(read2_addr, read_size);
 	memstackdist_memRead(read1_addr, read_size); // memstackdist
 	memstackdist_memRead(read2_addr, read_size);
 	fullmemstackdist_memRead(read1_addr, read_size); // fullmemstackdist
@@ -168,6 +173,7 @@ ADDRINT all_buffer_instruction_read(void* _e, ADDRINT read1_addr, ADDRINT read_s
 	//itypes_count_mem_read();
 	readMem_stride(stride_index_memread1, read1_addr, read_size);
 	memOp(read1_addr, read_size); // memfootprint
+	linecount_mem_op(read1_addr, read_size); // linecount
 	memstackdist_memRead(read1_addr, read_size); // memstackdist
 	fullmemstackdist_memRead(read1_addr, read_size); // fullmemstackdist
 	//return ilp_buffer_instruction_read(_e, read1_addr, read_size);
