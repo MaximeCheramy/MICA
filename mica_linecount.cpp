@@ -101,6 +101,7 @@ static ADDRINT linecount_instr_intervals() {
 
 VOID linecount_instr_interval_output(){
 	linecount_output();
+	output_file_linecount << working_set_size << " " << mem_ref << " " << (interval_size == -1 ? total_ins_count_for_hpc_alignment : interval_ins_count_for_hpc_alignment) << endl;
 	output_file_linecount << endl;
 }
 
