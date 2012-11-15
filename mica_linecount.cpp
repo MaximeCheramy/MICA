@@ -27,6 +27,7 @@ extern UINT32 _block_size;
 
 static ofstream output_file_linecount;
 static int accesses_for_line[MAX_TABLE_ACCESSES];
+static long int instructions_for_line[MAX_TABLE_ACCESSES];
 static int working_set_size = 0;
 static nlist* DmemCacheWorkingSetTable[MAX_MEM_TABLE_ENTRIES];
 static long long mem_ref = 0;
@@ -49,7 +50,7 @@ void init_linecount(){
 static void linecount_output() {
 	int begin = working_set_size - working_set_size % MAX_TABLE_ACCESSES;
 	for (int i = 0; i < MAX_TABLE_ACCESSES && i + begin <= working_set_size; i++) {
-		output_file_linecount << (begin + i) << " " << accesses_for_line[i] << endl;
+		output_file_linecount << (begin + i) << " " << accesses_for_line[i] << " " << instructions_for_line[i] << endl;
 	}
 }
 
@@ -78,6 +79,11 @@ VOID linecount_mem_op(ADDRINT effMemAddr, ADDRINT size){
 			if (!chunk->numReferenced[indexInChunk]) {
 				working_set_size++;
 				accesses_for_line[working_set_size % MAX_TABLE_ACCESSES] = mem_ref;
+				if (interval_size == -1) {
+					instructions_for_line[working_set_size % MAX_TABLE_ACCESSES] = total_ins_count_for_hpc_alignment;
+				} else {
+					instructions_for_line[working_set_size % MAX_TABLE_ACCESSES] = interval_ins_count_for_hpc_alignment;
+				}
 				if ((working_set_size + 1) % MAX_TABLE_ACCESSES == 0) {
 					linecount_output();
 				}
@@ -106,6 +112,7 @@ VOID linecount_instr_interval_reset(){
 		free_nlist(DmemCacheWorkingSetTable[i]);
 	}
 	accesses_for_line[0] = 0;
+	instructions_for_line[0] = 0;
 }
 
 static VOID linecount_instr_interval(){
