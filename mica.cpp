@@ -196,7 +196,7 @@ VOID Fini_all(INT32 code, VOID* v){
 
 /* ILP */
 VOID Instruction_ilp_all_only(INS ins, VOID* v){
-    instrument_instruction_count(ins, v);
+	instrument_instruction_count(ins, v);
 
 	ADDRINT insAddr = INS_Address(ins);
 
@@ -210,7 +210,7 @@ VOID Fini_ilp_all_only(INT32 code, VOID* v){
 
 /* ILP_ONE */
 VOID Instruction_ilp_one_only(INS ins, VOID* v){
-    instrument_instruction_count(ins, v);
+	instrument_instruction_count(ins, v);
 
 	ADDRINT insAddr = INS_Address(ins);
 
@@ -224,7 +224,7 @@ VOID Fini_ilp_one_only(INT32 code, VOID* v){
 
 /* ITYPES */
 VOID Instruction_itypes_only(INS ins, VOID* v){
-    instrument_instruction_count(ins, v);
+	instrument_instruction_count(ins, v);
 
 	instrument_itypes(ins, v);
 }
@@ -235,7 +235,7 @@ VOID Fini_itypes_only(INT32 code, VOID* v){
 
 /* PPM */
 VOID Instruction_ppm_only(INS ins, VOID* v){
-    instrument_instruction_count(ins, v);
+	instrument_instruction_count(ins, v);
 
 	instrument_ppm(ins, v);
 }
@@ -246,7 +246,7 @@ VOID Fini_ppm_only(INT32 code, VOID* v){
 
 /* REG */
 VOID Instruction_reg_only(INS ins, VOID* v){
-    instrument_instruction_count(ins, v);
+	instrument_instruction_count(ins, v);
 
 	ADDRINT insAddr = INS_Address(ins);
 
@@ -261,7 +261,7 @@ VOID Fini_reg_only(INT32 code, VOID* v){
 
 /* STRIDE */
 VOID Instruction_stride_only(INS ins, VOID* v){
-    instrument_instruction_count(ins, v);
+	instrument_instruction_count(ins, v);
 
 	instrument_stride(ins, v);
 }
@@ -272,7 +272,7 @@ VOID Fini_stride_only(INT32 code, VOID* v){
 
 /* MEMFOOTPRINT */
 VOID Instruction_memfootprint_only(INS ins, VOID* v){
-    instrument_instruction_count(ins, v);
+	instrument_instruction_count(ins, v);
 	instrument_memfootprint(ins, v);
 }
 
@@ -282,27 +282,7 @@ VOID Fini_memfootprint_only(INT32 code, VOID* v){
 
 /* LINECOUNT */
 VOID Instruction_linecount_only(INS ins, VOID* v){
-	if(interval_size == -1){
-		if(INS_HasRealRep(ins)){
-			INS_InsertIfCall(ins, IPOINT_BEFORE, (AFUNPTR)returnArg, IARG_FIRST_REP_ITERATION, IARG_END);
-			INS_InsertThenCall(ins, IPOINT_BEFORE, (AFUNPTR)all_instr_full_count_for_hpc_alignment_with_rep, IARG_REG_VALUE, INS_RepCountRegister(ins), IARG_END);
-		}
-		else{
-			INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)all_instr_full_count_for_hpc_alignment_no_rep, IARG_END);
-		}
-		INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)all_instr_full_count_always, IARG_END);
-	}
-	else{
-		if(INS_HasRealRep(ins)){
-			INS_InsertIfCall(ins, IPOINT_BEFORE, (AFUNPTR)returnArg, IARG_FIRST_REP_ITERATION, IARG_END);
-			INS_InsertThenCall(ins, IPOINT_BEFORE, (AFUNPTR)all_instr_intervals_count_for_hpc_alignment_with_rep, IARG_REG_VALUE, INS_RepCountRegister(ins), IARG_END);
-		}
-		else{
-			INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)all_instr_intervals_count_for_hpc_alignment_no_rep, IARG_END);
-		}
-		INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)all_instr_intervals_count_always, IARG_END);
-	}
-
+	instrument_instruction_count(ins, v);
 	instrument_linecount(ins, v);
 }
 
@@ -310,11 +290,9 @@ VOID Fini_linecount_only(INT32 code, VOID* v){
 	fini_linecount(code, v);
 }
 
-
-
 /* MEMSTACKDIST */
 VOID Instruction_memstackdist_only(INS ins, VOID* v){
-    instrument_instruction_count(ins, v);
+	instrument_instruction_count(ins, v);
 	instrument_memstackdist(ins, v);
 }
 
@@ -324,27 +302,7 @@ VOID Fini_memstackdist_only(INT32 code, VOID* v){
 
 /* FULLMEMSTACKDIST */
 VOID Instruction_fullmemstackdist_only(INS ins, VOID* v){
-	if(interval_size == -1){
-		if(INS_HasRealRep(ins)){
-			INS_InsertIfCall(ins, IPOINT_BEFORE, (AFUNPTR)returnArg, IARG_FIRST_REP_ITERATION, IARG_END);
-			INS_InsertThenCall(ins, IPOINT_BEFORE, (AFUNPTR)all_instr_full_count_for_hpc_alignment_with_rep, IARG_REG_VALUE, INS_RepCountRegister(ins), IARG_END);
-		}
-		else{
-			INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)all_instr_full_count_for_hpc_alignment_no_rep, IARG_END);
-		}
-		INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)all_instr_full_count_always, IARG_END);
-	}
-	else{
-		if(INS_HasRealRep(ins)){
-			INS_InsertIfCall(ins, IPOINT_BEFORE, (AFUNPTR)returnArg, IARG_FIRST_REP_ITERATION, IARG_END);
-			INS_InsertThenCall(ins, IPOINT_BEFORE, (AFUNPTR)all_instr_intervals_count_for_hpc_alignment_with_rep, IARG_REG_VALUE, INS_RepCountRegister(ins), IARG_END);
-		}
-		else{
-			INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)all_instr_intervals_count_for_hpc_alignment_no_rep, IARG_END);
-		}
-		INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)all_instr_intervals_count_always, IARG_END);
-	}
-
+	instrument_instruction_count(ins, v);
 	instrument_fullmemstackdist(ins, v);
 }
 
@@ -356,7 +314,7 @@ VOID Fini_fullmemstackdist_only(INT32 code, VOID* v){
 
 /* MY TYPE */
 VOID Instruction_custom(INS ins, VOID* v){
-    instrument_instruction_count(ins, v);
+	instrument_instruction_count(ins, v);
 
 	cerr << "Please choose a subset of characteristics you want to use, and remove this message (along with the exit call)" << endl;
 	exit(1);
