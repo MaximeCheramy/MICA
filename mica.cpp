@@ -71,6 +71,9 @@ int append_pid;
 /* helper */
 int thread_count = 0;
 
+static bool use_magic_instruction = false;
+static bool start_monitoring = false;
+
 /**********************************************
  *                    MAIN                    *
  **********************************************/
@@ -141,6 +144,14 @@ ins_buffer_entry* findInsBufferEntry(ADDRINT a){
 	return e;
 }
 
+static void instrument_start_monitoring(INS ins, VOID* v) {
+	if (use_magic_instruction) {
+		if (INS_IsXchg(ins) && INS_OperandReg(ins, 0) == INS_OperandReg(ins, 1)) {
+			start_monitoring ^= true;
+		}
+	}
+}
+
 static void instrument_instruction_count(INS ins, VOID* v) {
 	if(interval_size == -1)	{
 		if(INS_HasRealRep(ins)){
@@ -167,19 +178,22 @@ static void instrument_instruction_count(INS ins, VOID* v) {
 
 /* ALL */
 VOID Instruction_all(INS ins, VOID* v) {
-	instrument_instruction_count(ins, v);
+	instrument_start_monitoring(ins, v);
+	if (start_monitoring) {
+		instrument_instruction_count(ins, v);
 
-	ADDRINT insAddr = INS_Address(ins);
-	ins_buffer_entry* e = findInsBufferEntry(insAddr);
+		ADDRINT insAddr = INS_Address(ins);
+		ins_buffer_entry* e = findInsBufferEntry(insAddr);
 
-	//instrument_ilp_all(ins, e);
-	//instrument_itypes(ins, v);
-	//instrument_ppm(ins, v);
-	//instrument_reg(ins, e);
-	//instrument_stride(ins, v);
-	//instrument_memfootprint(ins, v);
-	//instrument_memstackdist(ins, v);
-	instrument_all(ins, v, e);
+		//instrument_ilp_all(ins, e);
+		//instrument_itypes(ins, v);
+		//instrument_ppm(ins, v);
+		//instrument_reg(ins, e);
+		//instrument_stride(ins, v);
+		//instrument_memfootprint(ins, v);
+		//instrument_memstackdist(ins, v);
+		instrument_all(ins, v, e);
+	}
 }
 
 VOID Fini_all(INT32 code, VOID* v){
@@ -196,12 +210,13 @@ VOID Fini_all(INT32 code, VOID* v){
 
 /* ILP */
 VOID Instruction_ilp_all_only(INS ins, VOID* v){
-	instrument_instruction_count(ins, v);
-
-	ADDRINT insAddr = INS_Address(ins);
-
-	ins_buffer_entry* e = findInsBufferEntry(insAddr);
-	instrument_ilp_all(ins, e);
+	instrument_start_monitoring(ins, v);
+	if (start_monitoring) {
+		instrument_instruction_count(ins, v);
+		ADDRINT insAddr = INS_Address(ins);
+		ins_buffer_entry* e = findInsBufferEntry(insAddr);
+		instrument_ilp_all(ins, e);
+	}
 }
 
 VOID Fini_ilp_all_only(INT32 code, VOID* v){
@@ -210,12 +225,13 @@ VOID Fini_ilp_all_only(INT32 code, VOID* v){
 
 /* ILP_ONE */
 VOID Instruction_ilp_one_only(INS ins, VOID* v){
-	instrument_instruction_count(ins, v);
-
-	ADDRINT insAddr = INS_Address(ins);
-
-	ins_buffer_entry* e = findInsBufferEntry(insAddr);
-	instrument_ilp_one(ins, e);
+	instrument_start_monitoring(ins, v);
+	if (start_monitoring) {
+		instrument_instruction_count(ins, v);
+		ADDRINT insAddr = INS_Address(ins);
+		ins_buffer_entry* e = findInsBufferEntry(insAddr);
+		instrument_ilp_one(ins, e);
+	}
 }
 
 VOID Fini_ilp_one_only(INT32 code, VOID* v){
@@ -224,9 +240,11 @@ VOID Fini_ilp_one_only(INT32 code, VOID* v){
 
 /* ITYPES */
 VOID Instruction_itypes_only(INS ins, VOID* v){
-	instrument_instruction_count(ins, v);
-
-	instrument_itypes(ins, v);
+	instrument_start_monitoring(ins, v);
+	if (start_monitoring) {
+		instrument_instruction_count(ins, v);
+		instrument_itypes(ins, v);
+	}
 }
 
 VOID Fini_itypes_only(INT32 code, VOID* v){
@@ -235,9 +253,11 @@ VOID Fini_itypes_only(INT32 code, VOID* v){
 
 /* PPM */
 VOID Instruction_ppm_only(INS ins, VOID* v){
-	instrument_instruction_count(ins, v);
-
-	instrument_ppm(ins, v);
+	instrument_start_monitoring(ins, v);
+	if (start_monitoring) {
+		instrument_instruction_count(ins, v);
+		instrument_ppm(ins, v);
+	}
 }
 
 VOID Fini_ppm_only(INT32 code, VOID* v){
@@ -246,13 +266,13 @@ VOID Fini_ppm_only(INT32 code, VOID* v){
 
 /* REG */
 VOID Instruction_reg_only(INS ins, VOID* v){
-	instrument_instruction_count(ins, v);
-
-	ADDRINT insAddr = INS_Address(ins);
-
-	ins_buffer_entry* e = findInsBufferEntry(insAddr);
-
-	instrument_reg(ins, e);
+	instrument_start_monitoring(ins, v);
+	if (start_monitoring) {
+		instrument_instruction_count(ins, v);
+		ADDRINT insAddr = INS_Address(ins);
+		ins_buffer_entry* e = findInsBufferEntry(insAddr);
+		instrument_reg(ins, e);
+	}
 }
 
 VOID Fini_reg_only(INT32 code, VOID* v){
@@ -261,9 +281,11 @@ VOID Fini_reg_only(INT32 code, VOID* v){
 
 /* STRIDE */
 VOID Instruction_stride_only(INS ins, VOID* v){
-	instrument_instruction_count(ins, v);
-
-	instrument_stride(ins, v);
+	instrument_start_monitoring(ins, v);
+	if (start_monitoring) {
+		instrument_instruction_count(ins, v);
+		instrument_stride(ins, v);
+	}
 }
 
 VOID Fini_stride_only(INT32 code, VOID* v){
@@ -272,8 +294,11 @@ VOID Fini_stride_only(INT32 code, VOID* v){
 
 /* MEMFOOTPRINT */
 VOID Instruction_memfootprint_only(INS ins, VOID* v){
-	instrument_instruction_count(ins, v);
-	instrument_memfootprint(ins, v);
+	instrument_start_monitoring(ins, v);
+	if (start_monitoring) {
+		instrument_instruction_count(ins, v);
+		instrument_memfootprint(ins, v);
+	}
 }
 
 VOID Fini_memfootprint_only(INT32 code, VOID* v){
@@ -282,8 +307,11 @@ VOID Fini_memfootprint_only(INT32 code, VOID* v){
 
 /* LINECOUNT */
 VOID Instruction_linecount_only(INS ins, VOID* v){
-	instrument_instruction_count(ins, v);
-	instrument_linecount(ins, v);
+	instrument_start_monitoring(ins, v);
+	if (start_monitoring) {
+		instrument_instruction_count(ins, v);
+		instrument_linecount(ins, v);
+	}
 }
 
 VOID Fini_linecount_only(INT32 code, VOID* v){
@@ -292,8 +320,11 @@ VOID Fini_linecount_only(INT32 code, VOID* v){
 
 /* MEMSTACKDIST */
 VOID Instruction_memstackdist_only(INS ins, VOID* v){
-	instrument_instruction_count(ins, v);
-	instrument_memstackdist(ins, v);
+	instrument_start_monitoring(ins, v);
+	if (start_monitoring) {
+		instrument_instruction_count(ins, v);
+		instrument_memstackdist(ins, v);
+	}
 }
 
 VOID Fini_memstackdist_only(INT32 code, VOID* v){
@@ -302,8 +333,11 @@ VOID Fini_memstackdist_only(INT32 code, VOID* v){
 
 /* FULLMEMSTACKDIST */
 VOID Instruction_fullmemstackdist_only(INS ins, VOID* v){
-	instrument_instruction_count(ins, v);
-	instrument_fullmemstackdist(ins, v);
+	instrument_start_monitoring(ins, v);
+	if (start_monitoring) {
+		instrument_instruction_count(ins, v);
+		instrument_fullmemstackdist(ins, v);
+	}
 }
 
 VOID Fini_fullmemstackdist_only(INT32 code, VOID* v){
@@ -376,7 +410,8 @@ int main(int argc, char* argv[]){
 
 	setup_mica_log(&log);
 
-	read_config(&log, &interval_size, &mode, &_ilp_win_size, &_block_size, &_page_size, &_itypes_spec_file, &append_pid);
+	read_config(&log, &interval_size, &mode, &_ilp_win_size, &_block_size, &_page_size, &_itypes_spec_file, &append_pid, &use_magic_instruction);
+    start_monitoring = !use_magic_instruction;
 
 	cerr << "interval_size: " << interval_size << ", mode: " << mode << endl;
 

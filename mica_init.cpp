@@ -31,10 +31,10 @@ void setup_mica_log(ofstream *log){
  * itypes_spec_file: <string>
  */
 
-enum CONFIG_PARAM {UNKNOWN_CONFIG_PARAM = -1, ANALYSIS_TYPE = 0, INTERVAL_SIZE, ILP_SIZE, BLOCK_SIZE, PAGE_SIZE, ITYPES_SPEC_FILE, APPEND_PID, CONF_PAR_CNT};
-const char* config_params_str[CONF_PAR_CNT] = {"analysis_type",   "interval_size", "ilp_size", "block_size", "page_size", "itypes_spec_file"};
+enum CONFIG_PARAM {UNKNOWN_CONFIG_PARAM = -1, ANALYSIS_TYPE = 0, INTERVAL_SIZE, ILP_SIZE, BLOCK_SIZE, PAGE_SIZE, ITYPES_SPEC_FILE, APPEND_PID, USE_MAGIC_INSTRUCTION, CONF_PAR_CNT};
+const char* config_params_str[] = {"analysis_type",   "interval_size", "ilp_size", "block_size", "page_size", "itypes_spec_file", "append_pid", "use_magic_instruction"};
 enum ANALYSIS_TYPE {UNKNOWN_ANALYSIS_TYPE = -1, ALL=0, ILP, ILP_ONE, ITYPES, PPM, MICA_REG, STRIDE, MEMFOOTPRINT, MEMSTACKDIST, FULLMEMSTACKDIST, LINECOUNT, CUSTOM, ANA_TYPE_CNT};
-const char* analysis_types_str[ANA_TYPE_CNT] = { "all",   "ilp", "ilp_one", "itypes", "ppm", "reg", "stride", "memfootprint", "memstackdist", "fullmemstackdist", "linecount", "custom"};
+const char* analysis_types_str[] = { "all",   "ilp", "ilp_one", "itypes", "ppm", "reg", "stride", "memfootprint", "memstackdist", "fullmemstackdist", "linecount", "custom"};
 
 enum CONFIG_PARAM findConfigParam(char* s){
 
@@ -45,6 +45,7 @@ enum CONFIG_PARAM findConfigParam(char* s){
 	if(strcmp(s, "page_size") == 0){ return PAGE_SIZE; }
 	if(strcmp(s, "itypes_spec_file") == 0){ return ITYPES_SPEC_FILE; }
 	if(strcmp(s, "append_pid") == 0){ return APPEND_PID; }
+	if (strcmp(s, "use_magic_instruction") == 0) { return USE_MAGIC_INSTRUCTION; }
 
 	return UNKNOWN_CONFIG_PARAM;
 }
@@ -67,7 +68,7 @@ enum ANALYSIS_TYPE findAnalysisType(char* s){
 	return UNKNOWN_ANALYSIS_TYPE;
 }
 
-void read_config(ofstream* log, INT64* intervalSize, MODE* mode, UINT32* _ilp_win_size, UINT32* _block_size, UINT32* _page_size, char** _itypes_spec_file, int* append_pid){
+void read_config(ofstream* log, INT64* intervalSize, MODE* mode, UINT32* _ilp_win_size, UINT32* _block_size, UINT32* _page_size, char** _itypes_spec_file, int* append_pid, bool* use_magic_instruction){
 
 	int i;
 	char* param;
@@ -251,6 +252,9 @@ void read_config(ofstream* log, INT64* intervalSize, MODE* mode, UINT32* _ilp_wi
 					(*log) << "ERROR! append_pid can be either yes or no" << endl;
 					exit(1);
 				}
+				break;
+			case USE_MAGIC_INSTRUCTION:
+				*use_magic_instruction = strcmp(val, "yes") == 0;
 				break;
 			default:
 				cerr << "ERROR: Unknown config parameter specified: " << param << " (" << val << ")" << endl;
