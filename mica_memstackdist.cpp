@@ -395,6 +395,10 @@ VOID instrument_memstackdist(INS ins, VOID *v){
 		if( INS_HasMemoryRead2(ins) )
 			INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)memstackdist_memRead, IARG_MEMORYREAD2_EA, IARG_MEMORYREAD_SIZE, IARG_END);
 	}
+	if(INS_IsMemoryWrite(ins)){
+		INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)memstackdist_memRead, IARG_MEMORYWRITE_EA, IARG_MEMORYWRITE_SIZE, IARG_END);
+	}
+
 
 	if(interval_size != -1){
 		INS_InsertIfCall(ins, IPOINT_BEFORE, (AFUNPTR)memstackdist_instr_intervals,IARG_END);
